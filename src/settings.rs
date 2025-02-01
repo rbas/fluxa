@@ -1,3 +1,5 @@
+use std::{error::Error, fmt};
+
 use serde::Deserialize;
 
 #[derive(Debug, Default, Deserialize, PartialEq, Eq, Clone)]
@@ -28,3 +30,18 @@ pub struct ServiceConfig {
     pub max_retries: usize,
     pub retry_interval: u64,
 }
+
+#[derive(Debug)]
+pub enum ServiceConfigurationError {
+    ErrorInConfiguration(String),
+}
+impl fmt::Display for ServiceConfigurationError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            ServiceConfigurationError::ErrorInConfiguration(s) => {
+                write!(f, "Configuration error in {}", s)
+            }
+        }
+    }
+}
+impl Error for ServiceConfigurationError {}
