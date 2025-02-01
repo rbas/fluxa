@@ -1,7 +1,7 @@
 use std::net::SocketAddr;
 
 use axum::{routing::get, Router};
-use log::{debug, error, info};
+use log::{debug, error, info, warn};
 use reqwest::Client;
 use tokio::time::{self, Duration};
 
@@ -64,7 +64,7 @@ async fn send_request(
         if current_health == HealthStatus::Healthy {
             info!("{} is now healthy!", config.url);
         } else {
-            error!("{} is unhealthy!", config.url);
+            warn!("{} is unhealthy!", config.url);
         }
         config.health_status = current_health.clone();
     }
