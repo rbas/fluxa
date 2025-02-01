@@ -14,7 +14,7 @@ enum HealthStatus {
 }
 
 #[derive(Debug)]
-struct MonitorConfig {
+struct MonitoredService {
     url: String,
     interval_seconds: u64,
     health_status: HealthStatus,
@@ -24,12 +24,12 @@ struct MonitorConfig {
 
 async fn send_request(
     client: &Client,
-    config: &mut MonitorConfig,
+    service: &mut MonitoredService,
     conf: &FluxaConfig,
 ) -> Result<HealthStatus, Box<dyn std::error::Error + Send + Sync>> {
     let mut current_health = HealthStatus::Unhealthy;
-    for attempt in 0..=config.max_retries {
-        match client.get(&config.url).send().await {
+    for attempt in 0..=service.max_retries {
+        match client.get(&service.url).send().await {
             Ok(response) => {
                 if response.status().is_success() {
                     current_health = HealthStatus::Healthy;
@@ -37,24 +37,24 @@ async fn send_request(
                 } else {
                     debug!(
                         "Request to {} failed with status: {}",
-                        config.url,
+                        service.url,
                         response.status()
                     );
                 }
             }
             Err(_) => {
-                if attempt < config.max_retries {
+                if attempt < service.max_retries {
                     debug!(
                         "Attempt {} to {} failed. Retrying in {:?}...",
                         attempt + 1,
-                        config.url,
-                        config.retry_interval
+                        service.url,
+                        service.retry_interval
                     );
-                    time::sleep(config.retry_interval).await;
+                    time::sleep(service.retry_interval).await;
                 } else {
                     debug!(
                         "Max retries ({}) exceeded for {}",
-                        config.max_retries, config.url
+                        service.max_retries, service.url
                     );
                     current_health = HealthStatus::Unhealthy;
                     break;
@@ -63,9 +63,9 @@ async fn send_request(
         }
     }
 
-    if current_health != config.health_status {
+    if current_health != service.health_status {
         if current_health == HealthStatus::Healthy {
-            let message = format!("{} is now healthy!", config.url);
+            let message = format!("{} is now healthy!", service.url);
             info!("{}", &message);
 
             let result =
@@ -76,7 +76,7 @@ async fn send_request(
                 error!("Problem with PushOver service {:?}", result.err());
             }
         } else {
-            let message = format!("{} is unhealthy!", config.url);
+            let message = format!("{} is unhealthy!", service.url);
             warn!("{}", &message);
 
             let result =
@@ -87,14 +87,14 @@ async fn send_request(
                 error!("Problem with PushOver service {:?}", result.err());
             }
         }
-        config.health_status = current_health.clone();
+        service.health_status = current_health.clone();
     }
 
     Ok(current_health)
 }
 
 async fn monitor_url(
-    mut config: MonitorConfig,
+    mut service: MonitoredService,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let settings = Config::builder()
         .add_source(File::with_name("config.local.toml"))
@@ -103,8 +103,8 @@ async fn monitor_url(
     let conf: FluxaConfig = settings.try_deserialize()?;
 
     loop {
-        send_request(&Client::new(), &mut config, &conf).await?;
-        time::sleep(Duration::from_secs(config.interval_seconds)).await;
+        send_request(&Client::new(), &mut service, &conf).await?;
+        time::sleep(Duration::from_secs(service.interval_seconds)).await;
     }
 }
 
@@ -131,7 +131,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     env_logger::init();
 
     // Configuration for monitoring
-    let configs = vec![MonitorConfig {
+    let services = vec![MonitoredService {
         url: "http://localhost:3000".to_string(),
         interval_seconds: 5,
         health_status: HealthStatus::Healthy,
@@ -143,8 +143,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 
     // Spawn monitoring tasks
     let mut handles = vec![];
-    for config in configs {
-        let handle = tokio::spawn(async move { monitor_url(config).await });
+    for service in services {
+        let handle = tokio::spawn(async move { monitor_url(service).await });
         handles.push(handle);
     }
 
