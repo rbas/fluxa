@@ -1,6 +1,8 @@
 # Fluxa
 
-![fluxa <](https://raw.githubusercontent.com/rbas/fluxa/main/assets/fluxa.webp) Fluxa is a lightweight and easy-to-use monitoring tool designed to check whether a given URL returns a successful HTTP status code. It continuously monitors the availability of web resources by sending periodic requests and alerts users if any issues are detected. Perfect for developers and system administrators looking for a straightforward solution to ensure their web services remain operational, Fluxa is built with simplicity in mind, making it easy to set up and use while maintaining reliability and effectiveness.
+Fluxa is a lightweight and easy-to-use monitoring tool designed to check whether a given URL returns a successful HTTP status code. It continuously monitors the availability of web resources by sending periodic requests and alerts users if any issues are detected. Perfect for developers and system administrators looking for a straightforward solution to ensure their web services remain operational, Fluxa is built with simplicity in mind, making it easy to set up and use while maintaining reliability and effectiveness.
+
+![fluxa >](https://raw.githubusercontent.com/rbas/fluxa/main/assets/fluxa.webp)
 
 ## Motivation
 
