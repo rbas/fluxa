@@ -9,7 +9,7 @@ use fluxa::{
     settings::{FluxaConfig, ServiceConfig},
 };
 use log::{debug, error, info, warn};
-use reqwest::Client;
+use reqwest::{Client, Url};
 use tokio::time::{self, Duration};
 
 #[derive(Debug, PartialEq, Clone)]
@@ -33,6 +33,31 @@ impl fmt::Display for ServiceConfigurationError {
 }
 impl Error for ServiceConfigurationError {}
 
+impl From<MonitoredServiceError> for ServiceConfigurationError {
+    fn from(error: MonitoredServiceError) -> Self {
+        match error {
+            MonitoredServiceError::InvalidUrl(s) => {
+                Self::ErrorInConfiguration(format!("Please fix the following problem: {}", s))
+            }
+        }
+    }
+}
+
+#[derive(Debug)]
+enum MonitoredServiceError {
+    InvalidUrl(String),
+}
+impl fmt::Display for MonitoredServiceError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            MonitoredServiceError::InvalidUrl(s) => {
+                write!(f, "{} is not valid url", s)
+            }
+        }
+    }
+}
+impl Error for MonitoredServiceError {}
+
 #[derive(Debug)]
 struct MonitoredService {
     url: String,
@@ -42,17 +67,42 @@ struct MonitoredService {
     retry_interval: Duration,
 }
 
+impl MonitoredService {
+    fn new(
+        url: String,
+        interval_seconds: u64,
+        health_status: HealthStatus,
+        max_retries: usize,
+        retry_interval: Duration,
+    ) -> Result<MonitoredService, MonitoredServiceError> {
+        if !is_valid_url(&url) {
+            return Err(MonitoredServiceError::InvalidUrl(url));
+        }
+        Ok(Self {
+            url,
+            interval_seconds,
+            health_status,
+            max_retries,
+            retry_interval,
+        })
+    }
+}
+
+fn is_valid_url(input: &str) -> bool {
+    Url::parse(input).is_ok()
+}
+
 impl TryFrom<&ServiceConfig> for MonitoredService {
     type Error = ServiceConfigurationError;
 
     fn try_from(service: &ServiceConfig) -> Result<Self, Self::Error> {
-        Ok(Self {
-            url: service.url.clone(),
-            interval_seconds: service.interval_seconds,
-            health_status: HealthStatus::Healthy,
-            max_retries: service.max_retries,
-            retry_interval: Duration::from_secs(service.retry_interval),
-        })
+        Ok(Self::new(
+            service.url.clone(),
+            service.interval_seconds,
+            HealthStatus::Healthy,
+            service.max_retries,
+            Duration::from_secs(service.retry_interval),
+        )?)
     }
 }
 
@@ -130,6 +180,7 @@ async fn send_request(
 async fn monitor_url(
     mut service: MonitoredService,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    // TODO Getting the config as parameter
     let settings = Config::builder()
         .add_source(File::with_name("config.local.toml"))
         .build()?;
@@ -149,6 +200,7 @@ async fn status_handler() -> &'static str {
 async fn spawn_webserver() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let app = Router::new().route("/", get(status_handler));
 
+    // TODO reading the port from configuration
     let addr = SocketAddr::from(([127, 0, 0, 1], 8080));
     info!("Listening on {}", addr);
 
@@ -187,7 +239,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     // Spawn monitoring tasks
     let mut handles = vec![];
     for service in services {
-        let handle = tokio::spawn(async move { monitor_url(service).await });
+        let handle = tokio::spawn(async move {
+            // TODO Handle errors
+            monitor_url(service).await
+        });
         handles.push(handle);
     }
 
