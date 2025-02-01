@@ -1,6 +1,8 @@
 use std::net::SocketAddr;
 
 use axum::{routing::get, Router};
+use config::{Config, File};
+use fluxa::{notification::pushover_notification, settings::FluxaConfig};
 use log::{debug, error, info, warn};
 use reqwest::Client;
 use tokio::time::{self, Duration};
@@ -23,6 +25,7 @@ struct MonitorConfig {
 async fn send_request(
     client: &Client,
     config: &mut MonitorConfig,
+    conf: &FluxaConfig,
 ) -> Result<HealthStatus, Box<dyn std::error::Error + Send + Sync>> {
     let mut current_health = HealthStatus::Unhealthy;
     for attempt in 0..=config.max_retries {
@@ -62,9 +65,27 @@ async fn send_request(
 
     if current_health != config.health_status {
         if current_health == HealthStatus::Healthy {
-            info!("{} is now healthy!", config.url);
+            let message = format!("{} is now healthy!", config.url);
+            info!("{}", &message);
+
+            let result =
+                pushover_notification(conf.pushover_api_key(), conf.pushover_user_key(), &message)
+                    .await;
+
+            if result.is_err() {
+                error!("Problem with PushOver service {:?}", result.err());
+            }
         } else {
-            warn!("{} is unhealthy!", config.url);
+            let message = format!("{} is unhealthy!", config.url);
+            warn!("{}", &message);
+
+            let result =
+                pushover_notification(conf.pushover_api_key(), conf.pushover_user_key(), &message)
+                    .await;
+
+            if result.is_err() {
+                error!("Problem with PushOver service {:?}", result.err());
+            }
         }
         config.health_status = current_health.clone();
     }
@@ -75,8 +96,14 @@ async fn send_request(
 async fn monitor_url(
     mut config: MonitorConfig,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    let settings = Config::builder()
+        .add_source(File::with_name("config.local.toml"))
+        .build()?;
+
+    let conf: FluxaConfig = settings.try_deserialize()?;
+
     loop {
-        send_request(&Client::new(), &mut config).await?;
+        send_request(&Client::new(), &mut config, &conf).await?;
         time::sleep(Duration::from_secs(config.interval_seconds)).await;
     }
 }
