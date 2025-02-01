@@ -1,8 +1,13 @@
+use core::fmt;
+use std::error::Error;
 use std::net::SocketAddr;
 
 use axum::{routing::get, Router};
 use config::{Config, File};
-use fluxa::{notification::pushover_notification, settings::FluxaConfig};
+use fluxa::{
+    notification::pushover_notification,
+    settings::{FluxaConfig, ServiceConfig},
+};
 use log::{debug, error, info, warn};
 use reqwest::Client;
 use tokio::time::{self, Duration};
@@ -14,12 +19,41 @@ enum HealthStatus {
 }
 
 #[derive(Debug)]
+enum ServiceConfigurationError {
+    ErrorInConfiguration(String),
+}
+impl fmt::Display for ServiceConfigurationError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            ServiceConfigurationError::ErrorInConfiguration(s) => {
+                write!(f, "Configuration error in {}", s)
+            }
+        }
+    }
+}
+impl Error for ServiceConfigurationError {}
+
+#[derive(Debug)]
 struct MonitoredService {
     url: String,
     interval_seconds: u64,
     health_status: HealthStatus,
     max_retries: usize,
     retry_interval: Duration,
+}
+
+impl TryFrom<&ServiceConfig> for MonitoredService {
+    type Error = ServiceConfigurationError;
+
+    fn try_from(service: &ServiceConfig) -> Result<Self, Self::Error> {
+        Ok(Self {
+            url: service.url.clone(),
+            interval_seconds: service.interval_seconds,
+            health_status: HealthStatus::Healthy,
+            max_retries: service.max_retries,
+            retry_interval: Duration::from_secs(service.retry_interval),
+        })
+    }
 }
 
 async fn send_request(
@@ -125,20 +159,29 @@ async fn spawn_webserver() -> Result<(), Box<dyn std::error::Error + Send + Sync
     Ok(())
 }
 
+fn build_services() -> Result<Vec<MonitoredService>, Box<dyn std::error::Error + Send + Sync>> {
+    let settings = Config::builder()
+        .add_source(File::with_name("config.local.toml"))
+        .build()?;
+
+    let conf: FluxaConfig = settings.try_deserialize()?;
+
+    let mut services: Vec<MonitoredService> = vec![];
+
+    for service in conf.services() {
+        services.push(MonitoredService::try_from(service)?)
+    }
+
+    Ok(services)
+}
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     // Set up logging
     env_logger::init();
 
     // Configuration for monitoring
-    let services = vec![MonitoredService {
-        url: "http://localhost:3000".to_string(),
-        interval_seconds: 5,
-        health_status: HealthStatus::Healthy,
-        max_retries: 3,
-        retry_interval: Duration::from_secs(1),
-    }];
-
+    let services = build_services()?;
     info!("Spawning monitoring");
 
     // Spawn monitoring tasks
