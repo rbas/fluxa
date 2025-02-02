@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.7] - 2025-02-02
+
+### 💼 Other
+
+- Tunning CI
+
 ## [0.1.6] - 2025-02-02
 
 ### 💼 Other
