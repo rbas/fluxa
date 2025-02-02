@@ -79,7 +79,7 @@ jobs:
           for dir in */; do
             if [ -d "$dir" ]; then
               dir_name="${dir%/}"
-              cp "config.sample.toml" "LICENSE" "$dir_name"
+              cp "config.sample.toml" "LICENSE" "CHANGELOG.md" "$dir_name"
               tar -cJf "${dir_name}.tar.xz" -C "$dir_name" .
               echo "Compressed ${dir_name}.tar.xz"
             fi
@@ -95,7 +95,7 @@ jobs:
             echo "$checksum : $filename" >> checksums.txt
           }
           rm -f checksums.txt
-          find . -type f -name '*.xz' -or -name 'fluxa*' | while read file; do
+          find . -type f -name '*.xz' | while read file; do
             md5sum_file "$file"
           done
 
