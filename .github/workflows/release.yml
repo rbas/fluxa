@@ -23,11 +23,6 @@ jobs:
             os: ubuntu-20.04
             target: x86_64-unknown-linux-gnu
             sys-type: linux
-
-          - build: linux-aarch64-gnu
-            os: ubuntu-20.04
-            target: aarch64-unknown-linux-gnu
-            sys-type: linux
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -43,9 +38,6 @@ jobs:
         run: |
           if [ "${{ matrix.build }}" = "linux-aarch64-gnu" ]; then
             sudo apt-get install -y gcc-aarch64-linux-gnu
-            rustup target add aarch64-unknown-linux-gnu
-          elif [ "${{ matrix.build }}" = "linux-64-musl" ]; then
-            sudo apt-get install -y musl-tools
           fi
       - name: Running cargo build
         shell: bash
