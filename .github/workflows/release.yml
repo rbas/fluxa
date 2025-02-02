@@ -95,7 +95,7 @@ jobs:
             echo "$checksum : $filename" >> checksums.txt
           }
           rm -f checksums.txt
-          find . -type f -name '*.xz' or -name 'fluxa*' | while read file; do
+          find . -type f -name '*.xz' -or -name 'fluxa*' | while read file; do
             md5sum_file "$file"
           done
 
