@@ -103,7 +103,7 @@ jobs:
         run: ls -R
 
       - name: Extract release notes
-        run: echo ${{ github.sha }} > RELEASE_NOTE.txt
+        run: echo CHANGELOG.md > RELEASE_NOTE.txt
 
       - name: Release
         uses: softprops/action-gh-release@v2
