@@ -50,7 +50,7 @@ jobs:
           elif [ "${{ matrix.build }}" = "linux-64-musl" ]; then
             sudo apt-get install -y musl-tools
           fi
-
+      - name: Running cargo build
         shell: bash
         run: cargo build --release --target ${{ matrix.target }}
 
