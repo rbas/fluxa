@@ -43,10 +43,7 @@ jobs:
         run: |
           if [ "${{ matrix.build }}" = "linux-aarch64-gnu" ]; then
             sudo apt-get install -y gcc-aarch64-linux-gnu
-          elif [ "${{ matrix.build }}" = "linux-i686-gnu" ]; then
-            sudo apt-get install -y gcc-multilib
-          elif [ "${{ matrix.build }}" = "linux-armv7-gnueabihf" ]; then
-            sudo apt-get install -y gcc-arm-linux-gnueabihf
+            rustup target add aarch64-unknown-linux-gnu
           elif [ "${{ matrix.build }}" = "linux-64-musl" ]; then
             sudo apt-get install -y musl-tools
           fi
