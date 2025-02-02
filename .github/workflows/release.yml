@@ -50,7 +50,7 @@ jobs:
 
           dirname="$binary_name-${{ matrix.target }}"
           mkdir "$dirname"
-          mv "target/${{ matrix.target }}/release/$binary_name" "$dirname"
+          mv "target/${{ matrix.target }}/release/$binary_name" "$dirname/"
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -73,6 +73,18 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v4
 
+      - name: Copy files & build archives
+        shell: bash
+        run: |
+          for dir in */; do
+            if [ -d "$dir" ]; then
+              dir_name="${dir%/}"
+              cp "config.sample.toml" "LICENSE" "$dir_name"
+              tar -cJf "${dir_name}.tar.xz" -C "$dir_name" .
+              echo "Compressed ${dir_name}.tar.xz"
+            fi
+          done
+
       - name: Generate checksums
         shell: bash
         run: |
@@ -83,7 +95,7 @@ jobs:
             echo "$checksum : $filename" >> checksums.txt
           }
           rm -f checksums.txt
-          find . -type f -name 'fluxa*' | while read file; do
+          find . -type f -name '*.xz' or -name 'fluxa*' | while read file; do
             md5sum_file "$file"
           done
 
@@ -99,5 +111,5 @@ jobs:
           name: Release ${{ github.ref_name }}
           body_path: RELEASE_NOTE.txt
           files: |
-            fluxa*/fluxa
+            fluxa*
             checksums.txt
