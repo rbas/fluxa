@@ -87,6 +87,9 @@ jobs:
             md5sum_file "$file"
           done
 
+      - name: Show directory structure
+        run: ls -R
+
       - name: Extract release notes
         run: echo ${{ github.sha }} > RELEASE_NOTE.txt
 
