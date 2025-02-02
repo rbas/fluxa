@@ -83,7 +83,7 @@ jobs:
             echo "$checksum : $filename" >> checksums.txt
           }
           rm -f checksums.txt
-          find . -type f -name '*.xz' -or -name '*.zip' | while read file; do
+          find . -type f -name 'fluxa*' | while read file; do
             md5sum_file "$file"
           done
 
@@ -96,6 +96,5 @@ jobs:
           name: Release ${{ github.ref_name }}
           body_path: RELEASE_NOTE.txt
           files: |
-            *.zip
-            *.xz
+            fluxa*
             checksums.txt
