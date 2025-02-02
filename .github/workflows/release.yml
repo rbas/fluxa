@@ -99,5 +99,5 @@ jobs:
           name: Release ${{ github.ref_name }}
           body_path: RELEASE_NOTE.txt
           files: |
-            fluxa*
+            fluxa*/fluxa
             checksums.txt
