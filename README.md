@@ -32,9 +32,6 @@ Rust will compile `fluxa`, and the resulting executable binary will be located a
 You are welcomed to fork the project and create a branch for each new feature you wish to add. Ensure that you write necessary tests and run the current tests before making your pull request.
 
 
-## Contribute
-You are welcomed to fork the project and create a branch for each new feature you wish to add. Ensure that you write necessary tests and run the current tests before making your pull request.
-
 ## License: MIT
 © 2025 Martin Voldrich
 This work is licensed under [MIT license](https://github.com/rbas/fluxa/blob/main/LICENSE).
