@@ -52,8 +52,7 @@ jobs:
           fi
 
         shell: bash
-        run: |
-          cargo build --release --target ${{ matrix.target }}
+        run: cargo build --release --target ${{ matrix.target }}
 
       - name: Make artifact folder
         shell: bash
