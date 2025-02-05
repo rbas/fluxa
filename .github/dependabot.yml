@@ -1,6 +1,6 @@
 version: 2
 updates:
-  - package-ecosystem: "cargp" 
+  - package-ecosystem: "cargo" 
     directory: "/"
     schedule:
       interval: "weekly"
