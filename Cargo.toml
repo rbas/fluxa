@@ -2,12 +2,23 @@
 name = "fluxa"
 version = "0.1.0"
 edition = "2021"
+description = "Fluxa is a lightweight monitoring tool that checks if a URL returns a successful HTTP status code. It provides simple, continuous monitoring and alerts users of any issues, ideal for developers and system administrators."
+readme = "README.md"
+license = "MIT"
+license-file = "LICENSE"
+categories = [
+  "command-line-utilities",
+  "development-tools",
+  "web-programming::http-client",
+  "web-programming::http-server",
+]
 
 [dependencies]
 axum = { version = "0.8.1", default-features = false, features = [
   "http1",
   "tokio",
 ] }
+clap = "4.5.29"
 config = { version = "0.15.7", default-features = false, features = ["toml"] }
 env_logger = { version = "0.11.6", default-features = false, features = [
   "auto-color",
