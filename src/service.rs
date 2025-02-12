@@ -1,18 +1,17 @@
-use config::{Config, File};
 use log::{debug, error, info, warn};
 use reqwest::Client;
 use tokio::time::{self, Duration};
 
 use crate::{
     model::{HealthStatus, MonitoredService},
-    notification::pushover_notification,
+    notification::Notifier,
     settings::FluxaConfig,
 };
 
 async fn send_request(
     client: &Client,
     service: &mut MonitoredService,
-    conf: &FluxaConfig,
+    notifier: &Notifier,
 ) -> Result<HealthStatus, Box<dyn std::error::Error + Send + Sync>> {
     let mut current_health = HealthStatus::Unhealthy;
     for attempt in 0..=service.max_retries {
@@ -55,9 +54,7 @@ async fn send_request(
             let message = format!("{} is now healthy!", service.url);
             info!("{}", &message);
 
-            let result =
-                pushover_notification(conf.pushover_api_key(), conf.pushover_user_key(), &message)
-                    .await;
+            let result = notifier.send(&message).await;
 
             if result.is_err() {
                 error!("Problem with PushOver service {:?}", result.err());
@@ -66,9 +63,7 @@ async fn send_request(
             let message = format!("{} is unhealthy!", service.url);
             warn!("{}", &message);
 
-            let result =
-                pushover_notification(conf.pushover_api_key(), conf.pushover_user_key(), &message)
-                    .await;
+            let result = notifier.send(&message).await;
 
             if result.is_err() {
                 error!("Problem with PushOver service {:?}", result.err());
@@ -82,33 +77,20 @@ async fn send_request(
 
 pub async fn monitor_url(
     mut service: MonitoredService,
-    config_path: &str,
+    notifier: Notifier,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-    // TODO Getting the config as parameter
-    let settings = Config::builder()
-        .add_source(File::with_name(config_path))
-        .build()?;
-
-    let conf: FluxaConfig = settings.try_deserialize()?;
-
+    send_request(&Client::new(), &mut service, &notifier).await?;
     loop {
-        send_request(&Client::new(), &mut service, &conf).await?;
         time::sleep(Duration::from_secs(service.interval_seconds)).await;
     }
 }
 
 pub fn build_services(
-    config_path: &str,
+    conf: &FluxaConfig,
 ) -> Result<Vec<MonitoredService>, Box<dyn std::error::Error + Send + Sync>> {
-    let settings = Config::builder()
-        .add_source(File::with_name(config_path))
-        .build()?;
-
-    let conf: FluxaConfig = settings.try_deserialize()?;
-
     let mut services: Vec<MonitoredService> = vec![];
 
-    for service in conf.services() {
+    for service in &conf.services {
         services.push(MonitoredService::try_from(service)?)
     }
 
