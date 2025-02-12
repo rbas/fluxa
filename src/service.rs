@@ -82,10 +82,11 @@ async fn send_request(
 
 pub async fn monitor_url(
     mut service: MonitoredService,
+    config_path: &str,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     // TODO Getting the config as parameter
     let settings = Config::builder()
-        .add_source(File::with_name("config.local.toml"))
+        .add_source(File::with_name(config_path))
         .build()?;
 
     let conf: FluxaConfig = settings.try_deserialize()?;
@@ -96,9 +97,11 @@ pub async fn monitor_url(
     }
 }
 
-pub fn build_services() -> Result<Vec<MonitoredService>, Box<dyn std::error::Error + Send + Sync>> {
+pub fn build_services(
+    config_path: &str,
+) -> Result<Vec<MonitoredService>, Box<dyn std::error::Error + Send + Sync>> {
     let settings = Config::builder()
-        .add_source(File::with_name("config.local.toml"))
+        .add_source(File::with_name(config_path))
         .build()?;
 
     let conf: FluxaConfig = settings.try_deserialize()?;

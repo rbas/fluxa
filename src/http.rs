@@ -7,11 +7,12 @@ async fn status_handler() -> &'static str {
     "Ok"
 }
 
-pub async fn spawn_web_server() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+pub async fn spawn_web_server(
+    socket_addr: &str,
+) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let app = Router::new().route("/", get(status_handler));
 
-    // TODO reading the port from configuration
-    let addr = SocketAddr::from(([127, 0, 0, 1], 8080));
+    let addr: SocketAddr = socket_addr.parse()?;
     info!("Listening on {}", addr);
 
     let listener = tokio::net::TcpListener::bind(&addr).await?;
