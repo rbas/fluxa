@@ -17,6 +17,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 
     let matches = Command::new(env!("CARGO_PKG_NAME"))
         .version(env!("CARGO_PKG_VERSION"))
+        .long_about(env!("CARGO_PKG_DESCRIPTION"))
         .arg(
             Arg::new("config")
                 .short('c')
