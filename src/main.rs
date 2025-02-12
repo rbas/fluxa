@@ -1,3 +1,6 @@
+use std::path::PathBuf;
+
+use clap::{builder::PathBufValueParser, Arg, Command};
 use config::{Config, File};
 use fluxa::{
     http::spawn_web_server,
@@ -12,10 +15,22 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     // Set up logging
     env_logger::init();
 
-    let config_path = "config.local.toml";
+    let matches = Command::new(env!("CARGO_PKG_NAME"))
+        .version(env!("CARGO_PKG_VERSION"))
+        .arg(
+            Arg::new("config")
+                .short('c')
+                .long("config")
+                .help("Path to configuration file")
+                .value_parser(PathBufValueParser::default()),
+        )
+        .get_matches();
+
+    let default_file = PathBuf::from("config.local.toml");
+    let config_path = matches.get_one("config").unwrap_or(&default_file);
 
     let settings = Config::builder()
-        .add_source(File::with_name(config_path))
+        .add_source(File::from(config_path.as_path()))
         .build()?;
 
     let conf: FluxaConfig = settings.try_deserialize()?;
