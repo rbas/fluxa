@@ -105,8 +105,14 @@ jobs:
       - name: Show directory structure
         run: ls -R
 
-      - name: Extract release notes
-        run: cat CHANGELOG.md > RELEASE_NOTE.txt
+      - name: Generate release notes
+        uses: orhun/git-cliff-action@v3
+        with:
+          config: cliff.toml
+          args: -l
+        env:
+          OUTPUT: RELEASE_NOTE.md
+          GITHUB_REPO: ${{ github.repository }}
 
       - name: Release
         uses: softprops/action-gh-release@v2

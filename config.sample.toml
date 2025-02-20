@@ -3,6 +3,22 @@ pushover_api_key = "api key"
 # Pushover user or group key
 pushover_user_key = "key"
 
+# Service is an array and can be defined multiple times
+#
+# Example
+#
+# [[Services]]
+# url = "https:/rbas.cz"
+# interval_seconds = 300
+# max_retries = 3
+# retry_interval = 3
+#
+# [[Services]]
+# url = "https://uptime.kuma.pet/"
+# interval_seconds = 300
+# max_retries = 3
+# retry_interval = 3
+
 [[services]]
 # Monitored url
 url = "http://localhost:3000"

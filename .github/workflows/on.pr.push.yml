@@ -1,0 +1,29 @@
+name: Rust
+
+on:
+  pull_request_target:
+    types: [assigned, opened, synchronize, reopened]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build_on_ubuntu:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Checking code syntax
+        run: cargo clippy
+      - name: Build
+        run: cargo build --verbose
+
+  build_on_macos:
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Checking code syntax
+        run: cargo clippy
+      - name: Build
+        run: cargo build --verbose
