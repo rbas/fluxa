@@ -1,9 +1,8 @@
 name: Rust
 
 on:
-  pull_request:
-    types:
-      - synchronize
+  pull_request_target:
+    types: [assigned, opened, synchronize, reopened]
 
 env:
   CARGO_TERM_COLOR: always
