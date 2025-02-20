@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.2.1] - 2025-02-20
+
+### 💼 Other
+
+- *(deps)* Bump config from 0.15.7 to 0.15.8 (#5)
+
+### ⚙️ Miscellaneous Tasks
+
+- Issue-4 add integration gitcliff into pipeline (#6)
+
 ## [0.2.0] - 2025-02-12
 
 ### 🚀 Features
@@ -20,8 +30,8 @@
 - Fixing GH integration
 - Fixing CI integration
 - Removing arm linux target
-- Tuning CI
-- Debugging CI
+- Tunning CI
+- Debuging CI
 - Debugging CI
 - Creating archives with binary files
 - Fixing typo
