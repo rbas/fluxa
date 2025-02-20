@@ -102,22 +102,24 @@ jobs:
             md5sum_file "$file"
           done
 
-      - name: Show directory structure
-        run: ls -R
-
       - name: Generate release notes
         uses: orhun/git-cliff-action@v3
+        id: git-cliff
         with:
           config: cliff.toml
-          args: -l
+          args: -vv --latest --strip header
         env:
           OUTPUT: RELEASE_NOTE.md
           GITHUB_REPO: ${{ github.repository }}
+
+      - name: Show directory structure
+        run: ls -R
 
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
           name: Release ${{ github.ref_name }}
+          body: ${{ steps.git-cliff.outputs.content }}
           body_path: RELEASE_NOTE.txt
           files: |
             fluxa*
