@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.2] - 2025-02-23
+
+### 🐛 Bug Fixes
+
+- Bug fixing and cleaning (#7)
+
 ## [0.2.1] - 2025-02-20
 
 ### 💼 Other
@@ -9,6 +15,9 @@
 ### ⚙️ Miscellaneous Tasks
 
 - Issue-4 add integration gitcliff into pipeline (#6)
+- Enhancing release pipeline
+- Enhancing release pipeline
+- Disable verbosity for git cliff
 
 ## [0.2.0] - 2025-02-12
 

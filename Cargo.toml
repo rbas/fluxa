@@ -1,6 +1,6 @@
 [package]
 name = "fluxa"
-version = "0.2.1"
+version = "0.2.2"
 edition = "2021"
 description = "Fluxa is a lightweight monitoring tool that checks if a URL returns a successful HTTP status code. It provides simple, continuous monitoring and alerts users of any issues, ideal for developers and system administrators."
 readme = "README.md"
