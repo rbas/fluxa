@@ -2,7 +2,7 @@ use std::{error::Error, fmt, time::Duration};
 
 use reqwest::Url;
 
-use crate::settings::{ServiceConfig, ServiceConfigurationError};
+use crate::settings::ServiceConfig;
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum HealthStatus {
@@ -10,7 +10,7 @@ pub enum HealthStatus {
     Unhealthy,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum MonitoredServiceError {
     InvalidUrl(String),
 }
@@ -24,16 +24,6 @@ impl fmt::Display for MonitoredServiceError {
     }
 }
 impl Error for MonitoredServiceError {}
-
-impl From<MonitoredServiceError> for ServiceConfigurationError {
-    fn from(error: MonitoredServiceError) -> Self {
-        match error {
-            MonitoredServiceError::InvalidUrl(s) => {
-                Self::ErrorInConfiguration(format!("Please fix the following problem: {}", s))
-            }
-        }
-    }
-}
 
 #[derive(Debug)]
 pub struct MonitoredService {
@@ -70,15 +60,34 @@ fn is_valid_url(input: &str) -> bool {
 }
 
 impl TryFrom<&ServiceConfig> for MonitoredService {
-    type Error = ServiceConfigurationError;
+    type Error = MonitoredServiceError;
 
     fn try_from(service: &ServiceConfig) -> Result<Self, Self::Error> {
-        Ok(Self::new(
+        Self::new(
             service.url.clone(),
             service.interval_seconds,
             HealthStatus::Healthy,
             service.max_retries,
             Duration::from_secs(service.retry_interval),
-        )?)
+        )
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_configuration_error_when_url_is_invalid() {
+        let config = ServiceConfig {
+            url: "".to_string(),
+            interval_seconds: 3,
+            max_retries: 3,
+            retry_interval: 333,
+        };
+
+        let actual = MonitoredService::try_from(&config);
+
+        assert!(actual.is_err());
     }
 }

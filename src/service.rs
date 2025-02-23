@@ -79,8 +79,8 @@ pub async fn monitor_url(
     mut service: MonitoredService,
     notifier: Notifier,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-    send_request(&Client::new(), &mut service, &notifier).await?;
     loop {
+        send_request(&Client::new(), &mut service, &notifier).await?;
         time::sleep(Duration::from_secs(service.interval_seconds)).await;
     }
 }

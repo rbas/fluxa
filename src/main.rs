@@ -1,7 +1,6 @@
 use std::path::PathBuf;
 
 use clap::{builder::PathBufValueParser, Arg, Command};
-use config::{Config, File};
 use fluxa::{
     http::spawn_web_server,
     notification::Notifier,
@@ -30,11 +29,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let default_file = PathBuf::from("config.local.toml");
     let config_path = matches.get_one("config").unwrap_or(&default_file);
 
-    let settings = Config::builder()
-        .add_source(File::from(config_path.as_path()))
-        .build()?;
-
-    let conf: FluxaConfig = settings.try_deserialize()?;
+    let conf = FluxaConfig::new(config_path.as_path())?;
 
     let notifier = Notifier::new(
         conf.pushover_api_key.clone(),
