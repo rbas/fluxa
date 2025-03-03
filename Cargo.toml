@@ -17,7 +17,7 @@ axum = { version = "0.8.1", default-features = false, features = [
   "http1",
   "tokio",
 ] }
-clap = "4.5.29"
+clap = "4.5.31"
 config = { version = "0.15.8", default-features = false, features = ["toml"] }
 env_logger = { version = "0.11.6", default-features = false, features = [
   "auto-color",
