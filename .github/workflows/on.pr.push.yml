@@ -18,7 +18,7 @@ jobs:
       - name: Build
         run: cargo build --verbose
       - name: test
-        run: carto test
+        run: cargo test
 
   build_on_macos:
     runs-on: macos-latest
