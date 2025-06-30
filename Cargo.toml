@@ -13,7 +13,7 @@ categories = [
 ]
 
 [dependencies]
-axum = { version = "0.8.1", default-features = false, features = [
+axum = { version = "0.8.4", default-features = false, features = [
   "http1",
   "tokio",
 ] }
