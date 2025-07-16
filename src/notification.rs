@@ -2,6 +2,8 @@ use log::debug;
 use reqwest::{self, Client};
 use serde_json::json;
 
+use crate::error::NotificationError;
+
 #[derive(Debug, Clone)]
 pub struct Notifier {
     api_key: String,
@@ -13,7 +15,7 @@ impl Notifier {
         Self { api_key, user_key }
     }
 
-    pub async fn send(&self, message: &str) -> Result<(), Box<dyn std::error::Error>> {
+    pub async fn send(&self, message: &str) -> Result<(), NotificationError> {
         pushover_notification(&self.api_key, &self.user_key, message).await
     }
 }
@@ -22,7 +24,7 @@ pub async fn pushover_notification(
     api_key: &str,
     user_key: &str,
     message: &str,
-) -> Result<(), Box<dyn std::error::Error>> {
+) -> Result<(), NotificationError> {
     let client = Client::new();
 
     let params = json!({
@@ -41,9 +43,9 @@ pub async fn pushover_notification(
         debug!("Notification sent successfully!");
         Ok(())
     } else {
-        Err(Box::new(std::io::Error::new(
-            std::io::ErrorKind::Other,
-            format!("Failed to send notification: {}", response.text().await?),
-        )))
+        let error_text = response.text().await?;
+        Err(NotificationError::SendFailed {
+            message: error_text,
+        })
     }
 }
