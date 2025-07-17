@@ -1,7 +1,8 @@
-use std::{error::Error, fmt, path::Path, str::FromStr};
+use std::{path::Path, str::FromStr};
 
 use config::{Config, ConfigError, File, FileFormat};
 use serde::Deserialize;
+use thiserror::Error;
 
 #[derive(Debug, Default, Deserialize, PartialEq, Eq, Clone)]
 pub struct ServiceConfig {
@@ -55,20 +56,11 @@ impl FromStr for FluxaConfig {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Error)]
 pub enum ServiceConfigurationError {
+    #[error("Configuration error {0}")]
     ErrorInConfiguration(String),
 }
-impl fmt::Display for ServiceConfigurationError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            ServiceConfigurationError::ErrorInConfiguration(s) => {
-                write!(f, "Configuration error {}", s)
-            }
-        }
-    }
-}
-impl Error for ServiceConfigurationError {}
 
 impl From<ConfigError> for ServiceConfigurationError {
     fn from(error: ConfigError) -> Self {

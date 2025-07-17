@@ -1,6 +1,7 @@
-use std::{error::Error, fmt, time::Duration};
+use std::time::Duration;
 
 use reqwest::Url;
+use thiserror::Error;
 
 use crate::settings::ServiceConfig;
 
@@ -10,20 +11,11 @@ pub enum HealthStatus {
     Unhealthy,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Error)]
 pub enum MonitoredServiceError {
+    #[error("{0} is not valid url")]
     InvalidUrl(String),
 }
-impl fmt::Display for MonitoredServiceError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            MonitoredServiceError::InvalidUrl(s) => {
-                write!(f, "{} is not valid url", s)
-            }
-        }
-    }
-}
-impl Error for MonitoredServiceError {}
 
 #[derive(Debug)]
 pub struct MonitoredService {

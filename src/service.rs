@@ -3,6 +3,7 @@ use reqwest::Client;
 use tokio::time::{self, Duration};
 
 use crate::{
+    error::ServiceError,
     model::{HealthStatus, MonitoredService},
     notification::Notifier,
     settings::FluxaConfig,
@@ -12,7 +13,7 @@ async fn send_request(
     client: &Client,
     service: &mut MonitoredService,
     notifier: &Notifier,
-) -> Result<HealthStatus, Box<dyn std::error::Error + Send + Sync>> {
+) -> Result<HealthStatus, ServiceError> {
     let mut current_health = HealthStatus::Unhealthy;
     for attempt in 0..=service.max_retries {
         match client.get(&service.url).send().await {
@@ -78,16 +79,14 @@ async fn send_request(
 pub async fn monitor_url(
     mut service: MonitoredService,
     notifier: Notifier,
-) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+) -> Result<(), ServiceError> {
     loop {
         send_request(&Client::new(), &mut service, &notifier).await?;
         time::sleep(Duration::from_secs(service.interval_seconds)).await;
     }
 }
 
-pub fn build_services(
-    conf: &FluxaConfig,
-) -> Result<Vec<MonitoredService>, Box<dyn std::error::Error + Send + Sync>> {
+pub fn build_services(conf: &FluxaConfig) -> Result<Vec<MonitoredService>, ServiceError> {
     let mut services: Vec<MonitoredService> = vec![];
 
     for service in &conf.services {

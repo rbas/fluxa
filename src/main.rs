@@ -2,6 +2,7 @@ use std::path::PathBuf;
 
 use clap::{builder::PathBufValueParser, Arg, Command};
 use fluxa::{
+    error::FluxaError,
     http::spawn_web_server,
     notification::Notifier,
     service::{build_services, monitor_url},
@@ -10,7 +11,7 @@ use fluxa::{
 use log::info;
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+async fn main() -> Result<(), FluxaError> {
     // Set up logging
     env_logger::init();
 
