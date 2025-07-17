@@ -86,9 +86,7 @@ pub async fn monitor_url(
     }
 }
 
-pub fn build_services(
-    conf: &FluxaConfig,
-) -> Result<Vec<MonitoredService>, ServiceError> {
+pub fn build_services(conf: &FluxaConfig) -> Result<Vec<MonitoredService>, ServiceError> {
     let mut services: Vec<MonitoredService> = vec![];
 
     for service in &conf.services {
