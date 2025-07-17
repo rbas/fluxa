@@ -1,5 +1,29 @@
 # Changelog
 
+## [0.3.0] - 2025-07-17
+
+### 💼 Other
+
+- *(deps)* Bump clap from 4.5.29 to 4.5.38 (#23)
+- *(deps)* Bump tokio from 1.43.0 to 1.45.1 (#24)
+- *(deps)* Bump log from 0.4.25 to 0.4.27 (#19)
+- *(deps)* Bump axum from 0.8.1 to 0.8.4 (#25)
+- *(deps)* Bump reqwest from 0.12.12 to 0.12.20 (#26)
+- *(deps)* Bump env_logger from 0.11.6 to 0.11.8 (#27)
+- *(deps)* Bump clap from 4.5.38 to 4.5.40 (#28)
+- *(deps)* Bump reqwest from 0.12.20 to 0.12.22 (#30)
+- *(deps)* Bump tokio from 1.45.1 to 1.46.1 (#29)
+- *(deps)* Bump clap from 4.5.40 to 4.5.41 (#31)
+- *(deps)* Bump config from 0.15.8 to 0.15.13 (#32)
+
+### 🚜 Refactor
+
+- Refactor error handling to use thiserror crate for custom errors (#33)
+
+### ⚙️ Miscellaneous Tasks
+
+- Fix typo in gh workflow
+
 ## [0.2.2] - 2025-02-23
 
 ### 🐛 Bug Fixes
