@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1] - 2025-07-18
+
+### ⚙️ Miscellaneous Tasks
+
+- Add possiblity to run release GH workflow manually
+- Change GH Action linux runner to ubuntu-latest
+
 ## [0.3.0] - 2025-07-17
 
 ### 💼 Other
@@ -23,6 +30,7 @@
 ### ⚙️ Miscellaneous Tasks
 
 - Fix typo in gh workflow
+- *(release)* Bump version
 
 ## [0.2.2] - 2025-02-23
 
