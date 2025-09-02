@@ -86,9 +86,9 @@ listen = "http://localhost:8080"
 [[services]]
 # Monitored url
 url = "http://localhost:3000"
-# How ofter the url will be monitored
+# How often the url will be monitored
 interval_seconds = 300
-# Determin how many times it will try before the url will be considered as down
+# Determine how many times it will try before the url will be considered as down
 max_retries = 3
 # How many seconds retry has to wait before next try
 retry_interval = 3
