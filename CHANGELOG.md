@@ -1,11 +1,27 @@
 # Changelog
 
+## [0.3.2] - 2025-09-02
+
+### 💼 Other
+
+- *(deps)* Bump tokio from 1.46.1 to 1.47.1 (#37)
+- *(deps)* Bump thiserror from 2.0.11 to 2.0.16 (#41)
+- *(deps)* Bump clap from 4.5.41 to 4.5.46 (#45)
+- *(deps)* Bump serde_json from 1.0.138 to 1.0.143 (#42)
+- *(deps)* Bump config from 0.15.13 to 0.15.15 (#46)
+
+### ⚙️ Miscellaneous Tasks
+
+- Fix typos
+
 ## [0.3.1] - 2025-07-18
 
 ### ⚙️ Miscellaneous Tasks
 
-- Add possiblity to run release GH workflow manually
+- Add possibility to run release GH workflow manually
 - Change GH Action linux runner to ubuntu-latest
+- *(release)* Bump version
+- Update GH action
 
 ## [0.3.0] - 2025-07-17
 
