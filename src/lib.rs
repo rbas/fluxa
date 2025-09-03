@@ -1,3 +1,4 @@
+pub mod dashboard;
 pub mod error;
 pub mod http;
 pub mod model;

@@ -14,6 +14,27 @@ cross-monitoring and ensure Fluxa itself remains up and running.
 
 ![fluxa >](https://raw.githubusercontent.com/rbas/fluxa/main/assets/fluxa.webp)
 
+### Dashboard Mode
+
+The interactive dashboard provides real-time monitoring with a clean terminal interface:
+
+```
+┌Status───────────────────────────────────────────────────────────────────────────────────┐
+│Fluxa Dashboard - Filter: All | Sort: Url | Services: 3                                  │
+└─────────────────────────────────────────────────────────────────────────────────────────┘
+┌MonitoredServices───────────────────────────────────────────────────────────────────────┐
+│URL                        Status      Response Time    Next Check       Error           │
+│https://example.com        Healthy     150.23ms        2m15s            -               │
+│https://api.service.com    Unhealthy   N/A             5s               HTTP 503: Serv… │
+│https://backup.service.com Healthy     89.45ms         1m30s            -               │
+└─────────────────────────────────────────────────────────────────────────────────────────┘
+┌Help─────────────────────────────────────────────────────────────────────────────────────┐
+│q/Esc: Quit | f: Filter | s: Sort | ↑/k: Up | ↓/j: Down                                 │
+└─────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+*Dashboard showing real-time monitoring status with color-coded health indicators*
+
 ## 🚀 Fluxa Features
 
 * **Lightweight and Efficient:** Fluxa has very low RAM usage (in units of MB),
@@ -22,6 +43,10 @@ making it ideal for low-resource environments.
 services like Uptime Kuma, but flexible enough to monitor any service by URL.
 * **Minimal Footprint:** Fluxa is a small, reliable service designed to
 run efficiently without consuming excessive resources.
+* **Interactive Dashboard:** Real-time terminal UI dashboard showing service status,
+response times, and monitoring progress with vim-like key bindings.
+* **Dual Operation Modes:** Choose between headless mode for server deployments
+or dashboard mode for interactive monitoring.
 
 ## 🛠 Usage
 
@@ -29,16 +54,61 @@ Once **Fluxa** is installed and the configuration file is ready, you can run it
 by executing the binary with the `--config` parameter, followed by the path
 to your configuration file.
 
-For example:
+### Headless Mode (Default)
+
+For headless monitoring with log output:
 
 ```shell
 ./fluxa --config /path/to/your/config.toml
 ```
 
-This will start **Fluxa**, and it will begin monitoring the services defined in your
+This will start **Fluxa** in headless mode, and it will begin monitoring the services defined in your
 configuration file. Additionally, Fluxa's internal web server will be running
 at the configured listen address (e.g., `127.0.0.1:8080`)
 to allow cross-monitoring of *Fluxa* itself.
+
+### Dashboard Mode
+
+For interactive terminal dashboard monitoring:
+
+```shell
+./fluxa --config /path/to/your/config.toml --dashboard
+```
+
+Or using the short form:
+
+```shell
+./fluxa -c /path/to/your/config.toml -d
+```
+
+The dashboard mode provides a real-time terminal UI that displays:
+
+- **All monitored URLs** with current status (Healthy/Unhealthy)
+- **Response times** in milliseconds for successful requests
+- **Next check countdown** showing when the next monitoring check will occur
+- **Error messages** for failed requests or connectivity issues
+- **Interactive filtering and sorting** options
+
+#### Dashboard Key Bindings (Vim-style)
+
+- **q** or **Esc**: Quit the dashboard
+- **f**: Toggle filter modes (All → Healthy Only → Unhealthy Only → All)
+- **s**: Toggle sort modes (URL → Status → Response Time → Next Check → URL)
+- **k** or **↑**: Move selection up
+- **j** or **↓**: Move selection down
+
+#### Filter Modes
+
+- **All**: Show all monitored services
+- **Healthy Only**: Show only services that are currently healthy
+- **Unhealthy Only**: Show only services that are currently down or failing
+
+#### Sort Modes
+
+- **URL**: Sort alphabetically by service URL
+- **Status**: Sort by health status (unhealthy services first)
+- **Response Time**: Sort by response time (fastest first)
+- **Next Check**: Sort by next check time (soonest first)
 
 ## 📦 Installation
 

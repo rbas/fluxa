@@ -1,4 +1,4 @@
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 use reqwest::Url;
 use thiserror::Error;
@@ -17,13 +17,17 @@ pub enum MonitoredServiceError {
     InvalidUrl(String),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct MonitoredService {
     pub url: String,
     pub interval_seconds: u64,
     pub health_status: HealthStatus,
     pub max_retries: usize,
     pub retry_interval: Duration,
+    pub last_check: Option<Instant>,
+    pub next_check: Option<Instant>,
+    pub response_time: Option<Duration>,
+    pub error_message: Option<String>,
 }
 
 impl MonitoredService {
@@ -37,13 +41,27 @@ impl MonitoredService {
         if !is_valid_url(&url) {
             return Err(MonitoredServiceError::InvalidUrl(url));
         }
+        let now = Instant::now();
         Ok(Self {
             url,
             interval_seconds,
             health_status,
             max_retries,
             retry_interval,
+            last_check: None,
+            next_check: Some(now + Duration::from_secs(interval_seconds)),
+            response_time: None,
+            error_message: None,
         })
+    }
+
+    pub fn update_after_check(&mut self, health_status: HealthStatus, response_time: Option<Duration>, error_message: Option<String>) {
+        let now = Instant::now();
+        self.health_status = health_status;
+        self.last_check = Some(now);
+        self.next_check = Some(now + Duration::from_secs(self.interval_seconds));
+        self.response_time = response_time;
+        self.error_message = error_message;
     }
 }
 
