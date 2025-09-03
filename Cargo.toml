@@ -19,10 +19,12 @@ axum = { version = "0.8.4", default-features = false, features = [
 ] }
 clap = "4.5.46"
 config = { version = "0.15.15", default-features = false, features = ["toml"] }
+crossterm = "0.28"
 env_logger = { version = "0.11.8", default-features = false, features = [
   "auto-color",
 ] }
 log = { version = "0.4.27", default-features = false }
+ratatui = "0.29"
 reqwest = { version = "0.12.22", default-features = false, features = [
   "json",
   "rustls-tls",
@@ -30,7 +32,7 @@ reqwest = { version = "0.12.22", default-features = false, features = [
 serde = { version = "1.0.217", default-features = false, features = ["derive"] }
 serde_json = { version = "1.0.143", default-features = false }
 thiserror = "2.0"
-tokio = { version = "1.47.1", features = ["macros", "rt-multi-thread"] }
+tokio = { version = "1.47.1", features = ["macros", "rt-multi-thread", "sync"] }
 
 [profile.release]
 opt-level = 'z'

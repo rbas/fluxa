@@ -19,6 +19,9 @@ pub enum FluxaError {
 
     #[error("Address parsing error: {0}")]
     AddrParse(#[from] std::net::AddrParseError),
+
+    #[error("Other error: {0}")]
+    Other(String),
 }
 
 /// Service monitoring and operation errors

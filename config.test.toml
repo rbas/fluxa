@@ -1,0 +1,28 @@
+# Pushover API key (can be dummy for testing)
+pushover_api_key = "test_api_key"
+# Pushover user or group key (can be dummy for testing)
+pushover_user_key = "test_user_key"
+
+[fluxa]
+listen = "127.0.0.1:8080"
+
+[[services]]
+# Test with a working URL
+url = "https://httpbin.org/status/200"
+interval_seconds = 10
+max_retries = 2
+retry_interval = 1
+
+[[services]]
+# Test with a failing URL  
+url = "https://httpbin.org/status/500"
+interval_seconds = 15
+max_retries = 2
+retry_interval = 1
+
+[[services]]
+# Test with a non-existent URL
+url = "https://this-url-does-not-exist-12345.com"
+interval_seconds = 20
+max_retries = 2
+retry_interval = 1
