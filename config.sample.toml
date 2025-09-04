@@ -7,24 +7,31 @@ pushover_user_key = "key"
 #
 # Example
 #
-# [[Services]]
+# [[services]]
 # url = "https:/rbas.cz"
 # interval_seconds = 300
 # max_retries = 3
 # retry_interval = 3
 #
-# [[Services]]
+# [[services]]
 # url = "https://uptime.kuma.pet/"
 # interval_seconds = 300
 # max_retries = 3
 # retry_interval = 3
 
+[fluxa]
+# HTTP server configuration
+listen = "127.0.0.1:8080"
+
+# Optional: Unix socket for API access (uncomment to enable)
+# api_socket = "/tmp/fluxa.sock"
+
 [[services]]
 # Monitored url
 url = "http://localhost:3000"
-# How ofter the url will be monitored
+# How often the url will be monitored
 interval_seconds = 300
-# Determin how many times it will try before the url will be considered as down
+# Determine how many times it will try before the url will be considered as down
 max_retries = 3
 # How many seconds retry has to wait before next try
 retry_interval = 3

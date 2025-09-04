@@ -15,6 +15,7 @@ pub struct ServiceConfig {
 #[derive(Debug, Default, Deserialize, PartialEq, Eq, Clone)]
 pub struct Fluxa {
     pub listen: String,
+    pub api_socket: Option<String>,
 }
 
 #[derive(Debug, Default, Deserialize, PartialEq, Eq, Clone)]
@@ -99,6 +100,40 @@ retry_interval = 3
             Ok(config) => {
                 assert_eq!(config.services.len(), 1);
                 assert_eq!(config.fluxa.listen, "http://localhost:8080");
+                assert_eq!(config.fluxa.api_socket, None);
+            }
+            Err(e) => {
+                panic!("Deserialization failed with error: {:?}", e);
+            }
+        }
+    }
+
+    #[test]
+    fn test_build_from_config_with_unix_socket() {
+        let fluxa_configuration = r#"
+# Pushover API key
+pushover_api_key = "api key"
+# Pushover user or group key
+pushover_user_key = "key"
+
+[fluxa]
+listen = "127.0.0.1:8080"
+api_socket = "/tmp/fluxa.sock"
+
+[[services]]
+# Monitored url
+url = "http://localhost:3000"
+interval_seconds = 300
+max_retries = 3
+retry_interval = 3
+        "#;
+        let result = fluxa_configuration.parse::<FluxaConfig>();
+
+        match result {
+            Ok(config) => {
+                assert_eq!(config.services.len(), 1);
+                assert_eq!(config.fluxa.listen, "127.0.0.1:8080");
+                assert_eq!(config.fluxa.api_socket, Some("/tmp/fluxa.sock".to_string()));
             }
             Err(e) => {
                 panic!("Deserialization failed with error: {:?}", e);
