@@ -117,22 +117,150 @@ Below is the configuration for how Fluxa will behave when running.
 
 ```toml
 [fluxa]
-# Listen on
+# Listen on HTTP
 listen = "127.0.0.1:8080"
+
+# Optional: Unix socket for API access
+api_socket = "/tmp/fluxa.sock"
 ```
 
 * `listen`: The address and port on which Fluxa will listen. In this example,
 Fluxa listens on `127.0.0.1:8080`, meaning it will only accept local connections.
 Adjust the address and port as needed.
+* `api_socket` (optional): Path to Unix socket for API access. When specified, 
+Fluxa will create a Unix socket that serves the same API endpoints as the HTTP server.
+This is useful for local monitoring tools and provides better security for local access.
 
 #### Fluxa Health Check Endpoint
 
-Fluxa provides an endpoint for cross-monitoring, which can be used to monitor the status of the Fluxa service itself. This endpoint responds with an HTTP status of `200`` and a body of`ok`. You can use this endpoint to monitor Fluxa using another monitoring system.
+Fluxa provides an endpoint for cross-monitoring, which can be used to monitor the status of the Fluxa service itself. This endpoint responds with an HTTP status of `200`` and a body of`Ok`. You can use this endpoint to monitor Fluxa using another monitoring system.
 
     Health Check URL: http://<fluxa_host>:<fluxa_port>/
     Response:
         HTTP Status: 200 OK
-        Body: ok
+        Body: Ok
+
+You can use this endpoint to confirm that Fluxa is running and responsive.
+
+#### Real-time Monitoring API
+
+Fluxa exposes a local API for real-time monitoring statistics, enabling you to build Terminal UI (TUI) applications or web interfaces. The API is available via both HTTP and Unix socket (if configured).
+
+**API Endpoints:**
+
+1. **List all monitored services:**
+   ```
+   GET /api/services
+   ```
+   
+   **Example Response:**
+   ```json
+   {
+     "services": [
+       {
+         "url": "https://example.com",
+         "interval_seconds": 300,
+         "max_retries": 3,
+         "retry_interval_seconds": 5,
+         "stats": {
+           "status": "Healthy",
+           "last_response_time_ms": 150,
+           "last_check_timestamp": 1672531200,
+           "next_check_timestamp": 1672531500,
+           "last_error": null,
+           "current_retry_count": 0
+         }
+       }
+     ],
+     "total_count": 1
+   }
+   ```
+
+2. **Get individual service details:**
+   ```
+   GET /api/services/{service_id}
+   ```
+   
+   The `service_id` can be either:
+   - Numeric index (0, 1, 2, ...)
+   - The exact URL of the service
+
+   **Example Response:**
+   ```json
+   {
+     "url": "https://example.com",
+     "interval_seconds": 300,
+     "max_retries": 3,
+     "retry_interval_seconds": 5,
+     "stats": {
+       "status": "Unhealthy",
+       "last_response_time_ms": null,
+       "last_check_timestamp": 1672531200,
+       "next_check_timestamp": 1672531500,
+       "last_error": "HTTP 500 - Internal Server Error",
+       "current_retry_count": 2
+     }
+   }
+   ```
+
+**API Usage Examples:**
+
+Using HTTP:
+```bash
+# Get all services
+curl http://127.0.0.1:8080/api/services
+
+# Get specific service by index
+curl http://127.0.0.1:8080/api/services/0
+
+# Get service by URL (URL-encoded)
+curl "http://127.0.0.1:8080/api/services/https%3A%2F%2Fexample.com"
+```
+
+Using Unix socket:
+```bash
+# Get all services
+curl --unix-socket /tmp/fluxa.sock http://localhost/api/services
+
+# Get specific service
+curl --unix-socket /tmp/fluxa.sock http://localhost/api/services/0
+```
+
+**Field Descriptions:**
+
+- `status`: Current health status ("Healthy" or "Unhealthy")
+- `last_response_time_ms`: Response time of the last successful request in milliseconds
+- `last_check_timestamp`: Unix timestamp of the last health check
+- `next_check_timestamp`: Unix timestamp of the next scheduled check
+- `last_error`: Description of the last error encountered (null if no errors)
+- `current_retry_count`: Number of retry attempts for the current check cycle
+
+**Building TUI/Web Clients:**
+
+The API is designed to be lightweight and easily consumed by monitoring tools:
+
+```bash
+# Example: Simple status check script
+#!/bin/bash
+SOCKET="/tmp/fluxa.sock"
+curl -s --unix-socket "$SOCKET" http://localhost/api/services | jq '.services[] | select(.stats.status == "Unhealthy")'
+```
+
+```python
+# Example: Python client for monitoring
+import requests
+import json
+
+def get_unhealthy_services():
+    response = requests.get("http://127.0.0.1:8080/api/services")
+    data = response.json()
+    return [s for s in data["services"] if s["stats"]["status"] == "Unhealthy"]
+```
+
+    Health Check URL: http://<fluxa_host>:<fluxa_port>/
+    Response:
+        HTTP Status: 200 OK
+        Body: Ok
 
 You can use this endpoint to confirm that Fluxa is running and responsive.
 
