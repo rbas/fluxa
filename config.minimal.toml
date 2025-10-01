@@ -1,31 +1,14 @@
-# 🚀 MINIMAL CONFIG - only Console notifications!
-# This config demonstrates that Pushover and Telegram are now optional
-
-# Fluxa web server konfigurace
 [fluxa]
 listen = "127.0.0.1:8080"
 
-# Monitorované služby
 [[services]]
-# Google - funkční služba
 url = "https://www.google.com"
 interval_seconds = 60
 max_retries = 2
 retry_interval = 3
 
 [[services]]
-# Testovací "nefunkční" služba
 url = "http://localhost:9999" 
 interval_seconds = 30
 max_retries = 1
 retry_interval = 2
-
-# 📱 Pushover keys MISSING - will use Console only!
-# pushover_api_key = ""
-# pushover_user_key = ""
-
-# 📱 Telegram MISSING - will use Console only!  
-# [telegram]
-# bot_token = ""
-# chat_id = ""
-
