@@ -1,27 +1,38 @@
 use std::net::SocketAddr;
-
+use std::str::FromStr;
 use axum::{routing::get, Router};
-use log::info;
+use log::{info};
 
-use crate::error::HttpError;
+use crate::error::{HttpError};
 
-async fn status_handler() -> &'static str {
-    "Ok"
+
+pub struct WebServer {
+    listen_address: String,
 }
 
-pub async fn spawn_web_server(socket_addr: &str) -> Result<(), HttpError> {
-    let app = Router::new().route("/", get(status_handler));
+impl WebServer {
+    pub fn new(listen_address: String) -> Self {
+        Self { listen_address }
+    }
 
-    let addr: SocketAddr = socket_addr.parse()?;
-    info!("Listening on {addr}");
+    pub async fn run(self) -> Result<(), HttpError> {
+        let app = Router::new().route("/", get(|| async {"OK"}));
 
-    let listener = tokio::net::TcpListener::bind(&addr).await?;
+        let addr = SocketAddr::from_str(self.listen_address.as_str())?;
 
-    let result = axum::serve(listener, app.into_make_service()).await;
-    match result {
-        Ok(_) => Ok(()),
-        Err(e) => Err(HttpError::Server {
-            message: e.to_string(),
-        }),
+        info!("🌐 Web server listening on {}", addr);
+
+        let listener = tokio::net::TcpListener::bind(&addr).await?;
+
+        match axum::serve(listener, app.into_make_service()).await {
+            Ok(_) => {
+                info!("Web server completed gracefully");
+                Ok(())
+            },
+            Err(e) => Err(HttpError::Server {
+                message: e.to_string()
+            })
+        }
+
     }
 }

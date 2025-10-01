@@ -18,9 +18,22 @@ pub struct Fluxa {
 }
 
 #[derive(Debug, Default, Deserialize, PartialEq, Eq, Clone)]
+pub struct TelegramConfig {
+    pub bot_token: String,
+    pub chat_id: String,
+}
+
+#[derive(Debug, Default, Deserialize, PartialEq, Eq, Clone)]
 pub struct FluxaConfig {
+    // Pushover config (optional) - top-level fields with default empty strings
+    #[serde(default)]
     pub pushover_api_key: String,
+    #[serde(default)]
     pub pushover_user_key: String,
+    
+    // Telegram config (optional) - structured section
+    pub telegram: Option<TelegramConfig>,
+    
     pub services: Vec<ServiceConfig>,
     pub fluxa: Fluxa,
 }
@@ -29,7 +42,9 @@ impl FluxaConfig {
         let settings = Config::builder()
             .add_source(File::from(path))
             .build()
-            .unwrap();
+            .map_err(|e| ServiceConfigurationError::ErrorInConfiguration(
+                format!("Failed to build config from path {:?}: {}", path, e)
+            ))?;
 
         Self::build(settings)
     }
@@ -50,7 +65,9 @@ impl FromStr for FluxaConfig {
         let settings = Config::builder()
             .add_source(File::from_str(s, FileFormat::Toml))
             .build()
-            .unwrap();
+            .map_err(|e| ServiceConfigurationError::ErrorInConfiguration(
+                format!("Failed to parse TOML string: {}", e)
+            ))?;
 
         Self::build(settings)
     }
