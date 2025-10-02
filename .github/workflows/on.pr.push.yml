@@ -13,6 +13,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+      - name: Install Rust toolchain with clippy
+        run: rustup component add clippy
       - name: Checking code syntax
         run: cargo clippy
       - name: Build
@@ -25,6 +27,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+      - name: Install Rust toolchain with clippy
+        run: rustup component add clippy
       - name: Checking code syntax
         run: cargo clippy
       - name: Build
