@@ -1,14 +1,12 @@
 use std::path::PathBuf;
 
 use clap::{builder::PathBufValueParser, Arg, Command};
-use log::info;
+use fluxa::http::WebServer;
 use fluxa::{
-    error::FluxaError,
-    monitoring::MonitoringService,
-    notification::NotificationManager,
+    error::FluxaError, monitoring::MonitoringService, notification::NotificationManager,
     settings::FluxaConfig,
 };
-use fluxa::http::WebServer;
+use log::info;
 
 #[tokio::main]
 async fn main() -> Result<(), FluxaError> {
@@ -32,15 +30,11 @@ async fn main() -> Result<(), FluxaError> {
     let conf = FluxaConfig::new(config_path.as_path())?;
 
     let http_client = std::sync::Arc::new(reqwest::Client::new());
-    let notification_manager = std::sync::Arc::new(
-        NotificationManager::from_config(&conf, http_client.clone())
-    );
-    
-    let monitoring_service = MonitoringService::new(
-        http_client,
-        notification_manager,
-        conf.services,
-    )?;
+    let notification_manager =
+        std::sync::Arc::new(NotificationManager::from_config(&conf, http_client.clone()));
+
+    let monitoring_service =
+        MonitoringService::new(http_client, notification_manager, conf.services)?;
 
     let web_server = WebServer::new(conf.fluxa.listen);
 

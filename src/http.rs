@@ -1,10 +1,9 @@
+use axum::{routing::get, Router};
+use log::info;
 use std::net::SocketAddr;
 use std::str::FromStr;
-use axum::{routing::get, Router};
-use log::{info};
 
-use crate::error::{HttpError};
-
+use crate::error::HttpError;
 
 pub struct WebServer {
     listen_address: String,
@@ -16,7 +15,7 @@ impl WebServer {
     }
 
     pub async fn run(self) -> Result<(), HttpError> {
-        let app = Router::new().route("/", get(|| async {"OK"}));
+        let app = Router::new().route("/", get(|| async { "OK" }));
 
         let addr = SocketAddr::from_str(self.listen_address.as_str())?;
 
@@ -28,11 +27,10 @@ impl WebServer {
             Ok(_) => {
                 info!("Web server completed gracefully");
                 Ok(())
-            },
+            }
             Err(e) => Err(HttpError::Server {
-                message: e.to_string()
-            })
+                message: e.to_string(),
+            }),
         }
-
     }
 }

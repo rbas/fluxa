@@ -12,7 +12,11 @@ pub struct NotificationManager {
 
 impl std::fmt::Debug for NotificationManager {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "NotificationManager {{ providers: {} }}", self.providers.len())
+        write!(
+            f,
+            "NotificationManager {{ providers: {} }}",
+            self.providers.len()
+        )
     }
 }
 
@@ -46,7 +50,10 @@ impl NotificationManager {
 
         // Telegram provider (optional - only if config section exists)
         if let Some(telegram_config) = &config.telegram {
-            info!("🚀 Adding Telegram notification provider (chat_id: {})", telegram_config.chat_id);
+            info!(
+                "🚀 Adding Telegram notification provider (chat_id: {})",
+                telegram_config.chat_id
+            );
             let telegram_provider = TelegramProvider::new(
                 telegram_config.bot_token.clone(),
                 telegram_config.chat_id.clone(),
@@ -67,7 +74,11 @@ impl NotificationManager {
             return Ok(());
         }
 
-        debug!("Sending notification to {} providers: '{}'", self.providers.len(), message);
+        debug!(
+            "Sending notification to {} providers: '{}'",
+            self.providers.len(),
+            message
+        );
 
         let mut errors = Vec::new();
 
@@ -113,8 +124,8 @@ pub struct PushoverProvider {
 
 impl PushoverProvider {
     pub fn new(api_key: String, user_key: String, http_client: Arc<reqwest::Client>) -> Self {
-        Self { 
-            api_key, 
+        Self {
+            api_key,
             user_key,
             http_client,
         }
@@ -130,7 +141,8 @@ impl NotificationProvider for PushoverProvider {
             "message": message
         });
 
-        let response = self.http_client
+        let response = self
+            .http_client
             .post("https://api.pushover.net/1/messages.json")
             .json(&params)
             .send()
@@ -141,13 +153,16 @@ impl NotificationProvider for PushoverProvider {
             debug!("Pushover notification sent successfully!");
             Ok(())
         } else {
-            let error_text = response.text().await.map_err(NotificationError::HttpRequest)?;
+            let error_text = response
+                .text()
+                .await
+                .map_err(NotificationError::HttpRequest)?;
             Err(NotificationError::SendFailed {
                 message: format!("Pushover API error: {}", error_text),
             })
         }
     }
-    
+
     fn provider_name(&self) -> &'static str {
         "Pushover"
     }
@@ -168,7 +183,7 @@ impl NotificationProvider for ConsoleProvider {
         println!("🔔 [CONSOLE NOTIFICATION]: {}", message);
         Ok(())
     }
-    
+
     fn provider_name(&self) -> &'static str {
         "Console"
     }
@@ -193,7 +208,7 @@ impl TelegramProvider {
     fn format_message(&self, message: &str) -> String {
         // Rich HTML formatting for Telegram
         let timestamp = chrono::Utc::now().format("%Y-%m-%d %H:%M:%S UTC");
-        
+
         if message.contains("unhealthy") || message.contains("down") {
             format!(
                 "🚨 <b>Service Alert</b>\n\n\
@@ -222,9 +237,9 @@ impl TelegramProvider {
 impl NotificationProvider for TelegramProvider {
     async fn send_notification(&self, message: &str) -> Result<(), NotificationError> {
         let url = format!("https://api.telegram.org/bot{}/sendMessage", self.bot_token);
-        
+
         let formatted_message = self.format_message(message);
-        
+
         let payload = serde_json::json!({
             "chat_id": self.chat_id,
             "text": formatted_message,
@@ -232,8 +247,9 @@ impl NotificationProvider for TelegramProvider {
         });
 
         debug!("Sending Telegram notification to chat {}", self.chat_id);
-        
-        let response = self.http_client
+
+        let response = self
+            .http_client
             .post(&url)
             .json(&payload)
             .send()
@@ -246,7 +262,10 @@ impl NotificationProvider for TelegramProvider {
             debug!("Telegram notification sent successfully!");
             Ok(())
         } else {
-            let error_text = response.text().await.unwrap_or_else(|_| "Unknown error".to_string());
+            let error_text = response
+                .text()
+                .await
+                .unwrap_or_else(|_| "Unknown error".to_string());
             Err(NotificationError::SendFailed {
                 message: format!("Telegram API error: {}", error_text),
             })
