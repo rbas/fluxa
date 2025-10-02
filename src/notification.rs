@@ -20,6 +20,12 @@ impl std::fmt::Debug for NotificationManager {
     }
 }
 
+impl Default for NotificationManager {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl NotificationManager {
     /// Create new empty notification manager
     pub fn new() -> Self {
@@ -170,6 +176,12 @@ impl NotificationProvider for PushoverProvider {
 
 #[derive(Debug)]
 pub struct ConsoleProvider;
+
+impl Default for ConsoleProvider {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 
 impl ConsoleProvider {
     pub fn new() -> Self {
