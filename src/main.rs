@@ -1,18 +1,15 @@
 use std::path::PathBuf;
 
 use clap::{builder::PathBufValueParser, Arg, Command};
+use fluxa::http::WebServer;
 use fluxa::{
-    error::FluxaError,
-    http::spawn_web_server,
-    notification::Notifier,
-    service::{build_services, monitor_url},
+    error::FluxaError, monitoring::MonitoringService, notification::NotificationManager,
     settings::FluxaConfig,
 };
 use log::info;
 
 #[tokio::main]
 async fn main() -> Result<(), FluxaError> {
-    // Set up logging
     env_logger::init();
 
     let matches = Command::new(env!("CARGO_PKG_NAME"))
@@ -32,35 +29,42 @@ async fn main() -> Result<(), FluxaError> {
 
     let conf = FluxaConfig::new(config_path.as_path())?;
 
-    let notifier = Notifier::new(
-        conf.pushover_api_key.clone(),
-        conf.pushover_user_key.clone(),
-    );
+    let http_client = std::sync::Arc::new(reqwest::Client::new());
+    let notification_manager =
+        std::sync::Arc::new(NotificationManager::from_config(&conf, http_client.clone()));
 
-    // Configuration for monitoring
-    let services = build_services(&conf)?;
+    let monitoring_service =
+        MonitoringService::new(http_client, notification_manager, conf.services)?;
 
-    info!("Spawning monitoring");
+    let web_server = WebServer::new(conf.fluxa.listen);
 
-    // Spawn monitoring tasks
-    let mut handles = vec![];
-    for service in services {
-        let notifier_clone = notifier.clone();
-        let handle = tokio::spawn(async move {
-            monitor_url(service, notifier_clone).await
-            // TODO Handle errors
-        });
-        handles.push(handle);
+    info!("🚀 Starting Fluxa with monitoring + web server");
+
+    tokio::select! {
+        monitoring_result = monitoring_service.run() => {
+            match monitoring_result {
+                Ok(_) => {
+                    log::warn!("Monitoring service completed unexpectedly");
+                    Ok(())
+                }
+                Err(e) => {
+                    log::error!("Monitoring service failed: {}", e);
+                    Err(e)
+                }
+            }
+        }
+
+        web_server_result = web_server.run() => {
+            match web_server_result {
+                Ok(_) => {
+                    log::warn!("Web server completed unexpectedly");
+                    Ok(())
+                }
+                Err(e) => {
+                    log::error!("Web server failed: {}", e);
+                    Err(FluxaError::Http(e))
+                }
+            }
+        }
     }
-
-    // Spawning web server for monitoring that service is alive
-    let socket_addr = conf.fluxa.listen.as_str();
-    spawn_web_server(socket_addr).await?;
-
-    // Wait for all tasks to complete (they will run indefinitely)
-    for handle in handles {
-        let _ = handle.await?;
-    }
-
-    Ok(())
 }

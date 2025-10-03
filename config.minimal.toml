@@ -1,0 +1,14 @@
+[fluxa]
+listen = "127.0.0.1:8080"
+
+[[services]]
+url = "https://www.google.com"
+interval_seconds = 60
+max_retries = 2
+retry_interval = 3
+
+[[services]]
+url = "http://localhost:9999" 
+interval_seconds = 30
+max_retries = 1
+retry_interval = 2
