@@ -1,7 +1,7 @@
 name: Rust
 
 on:
-  pull_request_target:
+  pull_request:
     types: [assigned, opened, synchronize, reopened]
 
 env:
@@ -13,6 +13,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+      - name: Install Rust toolchain with clippy
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
       - name: Checking code syntax
         run: cargo clippy
       - name: Build
@@ -25,6 +29,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+      - name: Install Rust toolchain with clippy
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
       - name: Checking code syntax
         run: cargo clippy
       - name: Build
